@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 using System.Text;
 using ZenithHarvest.Api.Middleware;
 using ZenithHarvest.Application.Security;
@@ -15,8 +16,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// SWAGGER
-builder.Services.AddSwaggerGen();
+// OPENAPI
+builder.Services.AddOpenApi();
 
 // DBCONTEXT + ORACLE
 builder.Services.AddDbContext<ZenithContext>(opt =>
@@ -68,8 +69,8 @@ app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
