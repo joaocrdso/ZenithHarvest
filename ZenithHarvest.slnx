@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ZenithHarvest.Api/ZenithHarvest.Api.csproj" />
+    <Project Path="src/ZenithHarvest.Application/ZenithHarvest.Application.csproj" />
+    <Project Path="src/ZenithHarvest.Domain/ZenithHarvest.Domain.csproj" />
+    <Project Path="src/ZenithHarvest.Infrastructure/ZenithHarvest.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ZenithHarvest.Tests/ZenithHarvest.Tests.csproj" />
+  </Folder>
+</Solution>
