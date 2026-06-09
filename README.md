@@ -1,298 +1,479 @@
-# 🌾 ZenithHarvest
-
-API REST para gestão de sinistros em seguros agrícolas usando análise de vegetação (NDVI).
-
-**Status:** ✅ Funcional e testado
+Segue uma versão de README muito mais alinhada com os requisitos da entrega. Você pode substituir praticamente todo o conteúdo atual por ela e depois apenas adicionar as imagens e os links dos vídeos.
 
 ---
 
-## 🚀 Quick Start (7 minutos)
+# 🌾 ZenithHarvest
 
-### 1. Pré-requisitos
+Sistema para gestão de sinistros agrícolas utilizando indicadores de vegetação (NDVI), permitindo que seguradoras realizem análises mais rápidas e precisas sobre perdas causadas por eventos climáticos.
 
-- **.NET SDK 10.0** ([Download](https://dotnet.microsoft.com/download))
-- **Docker Desktop** ([Download](https://www.docker.com/products/docker-desktop))
-- **Git**
+## 🎯 Objetivo
 
-### 2. Clonar e restaurar
+O agronegócio está sujeito a diversos riscos climáticos que podem causar prejuízos significativos aos produtores rurais. O processo tradicional de análise de sinistros costuma ser lento e dependente de vistorias presenciais.
+
+A ZenithHarvest propõe uma solução baseada em tecnologia para auxiliar seguradoras na análise de sinistros agrícolas por meio da integração de informações de vegetação obtidas por satélites, permitindo maior agilidade na tomada de decisão.
+
+---
+
+# 🏗️ Arquitetura da Solução
+
+A aplicação foi desenvolvida seguindo os princípios de **Clean Architecture**, garantindo separação de responsabilidades, facilidade de manutenção e escalabilidade.
+
+```mermaid
+graph TD
+
+    Client[Cliente] --> API[API REST]
+
+    API --> APP[Application Layer]
+
+    APP --> DOMAIN[Domain Layer]
+
+    APP --> INFRA[Infrastructure Layer]
+
+    INFRA --> DB[(Oracle Database)]
+```
+
+## Camadas
+
+### API
+
+Responsável por:
+
+* Exposição dos endpoints REST;
+* Autenticação;
+* Configuração da aplicação;
+* Documentação OpenAPI.
+
+### Application
+
+Responsável por:
+
+* Casos de uso;
+* Commands e Queries (CQRS);
+* DTOs;
+* Regras de aplicação.
+
+### Domain
+
+Responsável por:
+
+* Entidades;
+* Interfaces;
+* Regras de negócio.
+
+### Infrastructure
+
+Responsável por:
+
+* Persistência de dados;
+* Entity Framework Core;
+* Repositórios;
+* Oracle Database.
+
+---
+
+# 🔄 Fluxo da Aplicação
+
+```mermaid
+sequenceDiagram
+
+    participant Cliente
+    participant API
+    participant Application
+    participant Infrastructure
+    participant Oracle
+
+    Cliente->>API: Requisição HTTP
+    API->>Application: Executa Caso de Uso
+    Application->>Infrastructure: Consulta/Persistência
+    Infrastructure->>Oracle: Operações SQL
+    Oracle-->>Infrastructure: Resultado
+    Infrastructure-->>Application: Dados
+    Application-->>API: Resposta
+    API-->>Cliente: HTTP Response
+```
+
+---
+
+# 🛠️ Desenvolvimento
+
+## Padrões Utilizados
+
+### Clean Architecture
+
+Separação clara entre regras de negócio, infraestrutura e interface de entrada.
+
+### CQRS
+
+Separação entre:
+
+* Commands (escrita)
+* Queries (leitura)
+
+### Repository Pattern
+
+Abstração do acesso aos dados.
+
+### Dependency Injection
+
+Gerenciamento de dependências através do container nativo do .NET.
+
+---
+
+# 🗄️ Modelo de Dados
+
+Entidades principais do sistema:
+
+```mermaid
+erDiagram
+
+    INSURER ||--o{ POLICY : possui
+    POLICY ||--o{ CLAIM : gera
+
+    INSURER {
+        int Id
+        string Name
+    }
+
+    POLICY {
+        int Id
+        string PolicyNumber
+        decimal InsuredValue
+        int InsurerId
+    }
+
+    CLAIM {
+        int Id
+        int PolicyId
+        decimal LossPercentage
+        decimal NdviVariation
+        datetime CreatedAt
+    }
+```
+
+---
+
+# 🚀 Como Executar
+
+## Pré-requisitos
+
+* .NET SDK 10.0
+* Docker Desktop
+* Git
+
+## Clonar o Projeto
 
 ```bash
-git clone <seu-repo>
+git clone <URL_DO_REPOSITORIO>
 cd zenith-harvest-dotnet
 dotnet restore
 ```
 
-### 3. Iniciar Oracle em Docker
+---
+
+## Subir Banco Oracle
 
 ```powershell
-docker run -d -e ORACLE_PASSWORD=oracle123 -p 1521:1521 --name oracle-db gvenzl/oracle-free:latest
+docker run -d ^
+-e ORACLE_PASSWORD=oracle123 ^
+-p 1521:1521 ^
+--name oracle-db ^
+gvenzl/oracle-free:latest
 ```
 
-**Aguarde 3-5 minutos** até o banco estar pronto:
+Aguardar o Oracle finalizar a inicialização.
 
 ```powershell
 docker logs -f oracle-db
 ```
 
-Procure por: `DATABASE IS READY TO USE!` → Pressione **CTRL+C**
+Quando aparecer:
 
-### 4. Criar usuário no banco
+```text
+DATABASE IS READY TO USE!
+```
+
+---
+
+## Criar Usuário
 
 ```powershell
 docker exec -it oracle-db sqlplus sys/oracle123@localhost:1521/freepdb1 as sysdba
 ```
 
-Cole isto dentro do SQL:
-
 ```sql
 ALTER SESSION SET CONTAINER=FREEPDB1;
+
 CREATE USER zenith_user IDENTIFIED BY zenith123;
+
 GRANT CONNECT, RESOURCE, UNLIMITED TABLESPACE TO zenith_user;
+
 COMMIT;
 EXIT;
 ```
 
-### 5. Configurar connection string
+---
 
-Abra `src/ZenithHarvest.Api/appsettings.json` e verifique:
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Data Source=localhost:1521/freepdb1;User Id=zenith_user;Password=zenith123;"
-  },
-  "Jwt": {
-    "Secret": "PLACEHOLDER_256_BIT_SECRET_KEY_CHANGE_IN_PRODUCTION_MIN_32_CHARS"
-  },
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning",
-      "Microsoft.EntityFrameworkCore": "Warning"
-    }
-  },
-  "AllowedHosts": "*"
-}
-```
-
-### 6. Executar migrations
+## Executar Migrations
 
 ```powershell
-dotnet ef database update --project src/ZenithHarvest.Infrastructure `
-  --connection "Data Source=localhost:1521/freepdb1;User Id=zenith_user;Password=zenith123;"
+dotnet ef database update --project src/ZenithHarvest.Infrastructure
 ```
 
-**Esperado:**
-```
-Applying migration '20260606031856_InitialCreate'.
-Done.
-```
+---
 
-### 7. Rodar a aplicação
+## Executar Aplicação
 
 ```powershell
 dotnet run --project src/ZenithHarvest.Api --launch-profile https
 ```
 
-**Esperado:**
-```
-info: Microsoft.Hosting.Lifetime[14]
-      Now listening on: https://localhost:7177
-info: Microsoft.Hosting.Lifetime[14]
-      Now listening on: http://localhost:5032
+Saída esperada:
+
+```text
+Now listening on: https://localhost:7177
 ```
 
-### 8. Acessar a API
+---
 
-Abra no navegador:
-```
+## Documentação da API
+
+Acesse:
+
+```text
 https://localhost:7177/scalar/v1
 ```
 
-✅ **Pronto!** A API está funcionando com documentação interativa.
-
 ---
 
-## 📚 Endpoints
+# 📚 Endpoints
 
-### Auth
-- **POST** `/api/Auth/login` - Fazer login e receber JWT
+## Autenticação
 
-### Policies
-- **GET** `/api/Policies/{insurerId}` - Listar apólices por seguradora
-- **POST** `/api/Policies/claims` - Criar novo sinistro
+### Login
 
-### Health
-- **GET** `/health` - Verificar saúde da API
-
----
-
-## 🏗️ Arquitetura
-
-```
-API Layer
-  ↓
-Application Layer (Handlers, DTOs, Security)
-  ↓
-Domain Layer (Entities, Interfaces)
-  ↓
-Infrastructure Layer (DbContext, Repositories)
-  ↓
-Oracle Database
+```http
+POST /api/Auth/login
 ```
 
-**Padrões:** Clean Architecture, CQRS, Repository Pattern, Dependency Injection
+Retorna um token JWT para autenticação.
 
 ---
 
-## 🧪 Testes
+## Apólices
+
+### Listar Apólices
+
+```http
+GET /api/Policies/{insurerId}
+```
+
+### Criar Sinistro
+
+```http
+POST /api/Policies/claims
+```
+
+---
+
+## Health Check
+
+```http
+GET /health
+```
+
+---
+
+# 🔐 Segurança
+
+O sistema utiliza:
+
+* JWT Authentication;
+* Autorização baseada em token;
+* Tratamento global de exceções;
+* Validação de entrada de dados;
+* Health Checks.
+
+---
+
+# 🧪 Testes
+
+## Executar Testes
 
 ```bash
 dotnet test tests/ZenithHarvest.Tests
 ```
 
-Com cobertura:
+## Cobertura de Código
+
 ```bash
 dotnet test tests/ZenithHarvest.Tests --collect:"XPlat Code Coverage"
 ```
 
----
+## Escopo dos Testes
 
-## 🆘 Troubleshooting
+### Testes Unitários
 
-### ❌ ORA-12514: Serviço não encontrado
+Validação de:
 
-**Solução:** Aguarde o Oracle inicializar completamente (5-10 minutos)
+* Casos de uso;
+* Regras de negócio;
+* Handlers;
+* Autenticação.
 
-```powershell
-docker logs oracle-db | Select-String "DATABASE IS READY"
-```
+### Testes de Integração
 
----
+Validação de:
 
-### ❌ ORA-01017: Usuário/senha inválidos
-
-**Solução:** Recrie o usuário
-
-```powershell
-docker exec -it oracle-db sqlplus sys/oracle123@localhost:1521/freepdb1 as sysdba
-```
-
-```sql
-ALTER SESSION SET CONTAINER=FREEPDB1;
-DROP USER zenith_user CASCADE;
-CREATE USER zenith_user IDENTIFIED BY zenith123;
-GRANT CONNECT, RESOURCE, UNLIMITED TABLESPACE TO zenith_user;
-COMMIT;
-EXIT;
-```
+* Persistência Oracle;
+* Endpoints REST;
+* Fluxo da aplicação;
+* Health Checks.
 
 ---
 
-### ❌ Migration falha com "Cannot connect to service"
+# 📋 Exemplos de Uso
 
-**Solução:** Use connection string explícita
+## Login
 
-```powershell
-dotnet ef database update --project src/ZenithHarvest.Infrastructure `
-  --connection "Data Source=localhost:1521/freepdb1;User Id=zenith_user;Password=zenith123;"
+```bash
+curl -X POST https://localhost:7177/api/Auth/login \
+-H "Content-Type: application/json" \
+-d '{"email":"teste@seguros.com","senha":"senha123"}'
 ```
 
----
+Resposta:
 
-### ⚠️ NuGet Warning (Microsoft.Extensions.Caching.Memory)
-
-**Solução (opcional):**
-```powershell
-dotnet add package Microsoft.Extensions.Caching.Memory --version 9.0.0 --project src/ZenithHarvest.Infrastructure
+```json
+{
+  "token": "jwt-token"
+}
 ```
 
 ---
 
-## 📂 Estrutura de Pastas
+## Consultar Apólices
 
+```bash
+curl -X GET https://localhost:7177/api/Policies/1 \
+-H "Authorization: Bearer SEU_TOKEN"
 ```
-zenith-harvest-dotnet/
-├── src/
-│   ├── ZenithHarvest.Api/              # ASP.NET Core (Controllers, Program.cs)
-│   ├── ZenithHarvest.Application/      # Use Cases (Handlers, DTOs)
-│   ├── ZenithHarvest.Domain/           # Business Logic (Entities, Interfaces)
-│   └── ZenithHarvest.Infrastructure/   # Data Access (DbContext, Migrations)
+
+---
+
+# 📸 Evidências
+
+## Documentação OpenAPI
+
+> Inserir captura de tela da documentação Scalar.
+
+## Execução da API
+
+> Inserir captura de tela da aplicação em execução.
+
+## Banco Oracle
+
+> Inserir captura de tela do container Oracle.
+
+## Testes Automatizados
+
+> Inserir captura de tela da execução dos testes.
+
+---
+
+# 🎥 Vídeos
+
+## Demonstração da Solução (até 8 minutos)
+
+Link:
+
+```text
+[Adicionar link do vídeo]
+```
+
+Conteúdo apresentado:
+
+* Arquitetura;
+* Banco Oracle;
+* Execução da aplicação;
+* Login;
+* JWT;
+* Endpoints;
+* Testes.
+
+---
+
+## Pitch (até 3 minutos)
+
+Link:
+
+```text
+[Adicionar link do vídeo]
+```
+
+Conteúdo apresentado:
+
+* Problema;
+* Solução;
+* Diferenciais;
+* Tecnologias;
+* Benefícios para seguradoras.
+
+---
+
+# 📂 Estrutura do Projeto
+
+```text
+zenith-harvest-dotnet
 │
-├── tests/
-│   └── ZenithHarvest.Tests/            # Unit & Integration Tests
+├── src
+│   ├── ZenithHarvest.Api
+│   ├── ZenithHarvest.Application
+│   ├── ZenithHarvest.Domain
+│   └── ZenithHarvest.Infrastructure
+│
+├── tests
+│   └── ZenithHarvest.Tests
 │
 └── README.md
 ```
 
 ---
 
-## 🔑 Tecnologias
+# 🔧 Tecnologias Utilizadas
 
-| Tecnologia | Versão | Uso |
-|-----------|--------|-----|
-| .NET | 10.0 | Runtime |
-| ASP.NET Core | 10 | Web Framework |
-| Entity Framework Core | 8 | ORM |
-| Oracle Database | 21c Free | Banco de Dados |
-| JWT | - | Autenticação |
-| xUnit | - | Testes |
-
----
-
-## ✅ Checklist de Funcionalidades
-
-- ✅ Clean Architecture implementada
-- ✅ Autenticação JWT funcional
-- ✅ Testes automatizados (xUnit)
-- ✅ Health Checks
-- ✅ OpenAPI/Swagger documentado
-- ✅ Migrations do EF Core
-- ✅ Docker configurado
-- ✅ Exception Handling global
+| Tecnologia               | Finalidade           |
+| ------------------------ | -------------------- |
+| .NET 10                  | Plataforma principal |
+| ASP.NET Core             | API REST             |
+| Entity Framework Core    | ORM                  |
+| Oracle Database 21c Free | Banco de Dados       |
+| JWT                      | Autenticação         |
+| xUnit                    | Testes               |
+| Docker                   | Containerização      |
+| Scalar/OpenAPI           | Documentação         |
 
 ---
 
-## 📋 Exemplo de Requisição
+# ✅ Funcionalidades Implementadas
 
-### Login
-
-```bash
-curl -X POST https://localhost:7177/api/Auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"teste@seguros.com","senha":"senha123"}'
-```
-
-**Resposta:**
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
-
-### Usar Token
-
-```bash
-curl -X GET https://localhost:7177/api/Policies/1 \
-  -H "Authorization: Bearer SEU_TOKEN_JWT"
-```
+* ✅ Clean Architecture
+* ✅ CQRS
+* ✅ Repository Pattern
+* ✅ Oracle Database
+* ✅ Entity Framework Core
+* ✅ JWT Authentication
+* ✅ OpenAPI/Scalar
+* ✅ Health Checks
+* ✅ Migrations
+* ✅ Testes Automatizados
+* ✅ Tratamento Global de Exceções
 
 ---
 
-## 📄 Licença
+# 📄 Licença
 
-MIT
-
----
-
-## 📝 Observações
-
-- **Connection String:** Usa Oracle Free com PDB `FREEPDB1`
-- **Senha padrão:** `zenith123`
-- **Usuário padrão:** `zenith_user`
-- **JWT Secret:** Alterar em produção
-- **Base URL:** `https://localhost:7177`
+Projeto desenvolvido para fins acadêmicos e demonstrativos.
 
 ---
 
-**Última atualização:** Junho 2026 | **.NET 10.0** | **Oracle 21c Free**
+Esse README atende muito melhor aos requisitos de **diagramas**, **desenvolvimento**, **testes**, **instruções de acesso** e **exemplos de uso** que normalmente aparecem em desafios da FIAP/Global Solution e processos seletivos.
