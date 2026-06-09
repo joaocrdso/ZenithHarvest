@@ -1,7 +1,3 @@
-Segue uma versão de README muito mais alinhada com os requisitos da entrega. Você pode substituir praticamente todo o conteúdo atual por ela e depois apenas adicionar as imagens e os links dos vídeos.
-
----
-
 # 🌾 ZenithHarvest
 
 Sistema para gestão de sinistros agrícolas utilizando indicadores de vegetação (NDVI), permitindo que seguradoras realizem análises mais rápidas e precisas sobre perdas causadas por eventos climáticos.
