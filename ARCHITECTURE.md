@@ -482,16 +482,95 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
         │
 2. PoliciesController.CreateClaim()
     ├─ Valida autenticação [Authorize]
-    └─ Cria CreateClaimCommand
+    ├─ Mapeia CreateClaimRequest → CreateClaimCommand
+    └─ Injeta IClaimHandler
         │
 3. CreateClaimHandler.Handle(command)
-    ├─ Busca Policy em IClaimRepository (DIP)
-    ├─ Valida regra de negócio
-    ├─ Cria entidade Claim
-    └─ Persiste via repository
+    ├─ Busca Policy em IPolicyRepository
+    ├─ Valida: Policy ativa? NDVI válido? Evento válido?
+    ├─ Cria nova instância de Claim (Entity)
+    ├─ Persiste via IClaimRepository.AddAsync()
+    └─ Retorna ClaimDto
         │
-4. Converte para ClaimDto
-    └─ Retorna 201 Created
+4. ExceptionHandlerMiddleware (se houver erro)
+    ├─ Captura exceções globalmente
+    ├─ Converte para ProblemDetails
+    └─ Retorna 500 ou status apropriado
+        │
+5. Response HTTP
+    ├─ Status: 201 Created
+    ├─ Body: ClaimDto (JSON)
+    └─ Header: Location: /api/policies/claims/{id}
+```
+
+---
+
+## ⚙️ Configuração de Desenvolvimento
+
+### Banco de Dados (Oracle Free em Docker)
+
+```yaml
+Database:
+  Type: Oracle Database 21c Free
+  Container: gvenzl/oracle-free:latest
+  Port: 1521
+  Service Name: FREEPDB1
+  User: zenith_user
+  Password: zenith123
+```
+
+**Setup Inicial:**
+```powershell
+# 1. Iniciar container
+docker run -d -e ORACLE_PASSWORD=oracle123 -p 1521:1521 --name oracle-db gvenzl/oracle-free:latest
+
+# 2. Aguardar inicialização (~5 minutos)
+docker logs -f oracle-db
+
+# 3. Criar usuário
+docker exec -it oracle-db sqlplus sys/oracle123@localhost:1521/freepdb1 as sysdba
+
+# SQL:
+ALTER SESSION SET CONTAINER=FREEPDB1;
+CREATE USER zenith_user IDENTIFIED BY zenith123;
+GRANT CONNECT, RESOURCE, UNLIMITED TABLESPACE TO zenith_user;
+COMMIT;
+EXIT;
+```
+
+**Connection String:**
+```
+Data Source=localhost:1521/freepdb1;User Id=zenith_user;Password=zenith123;
+```
+
+---
+
+### Entity Framework Core Setup
+
+**Criar Migration:**
+```powershell
+dotnet ef migrations add NomeMigracao --project src/ZenithHarvest.Infrastructure
+```
+
+**Aplicar Migration (com connection string explícita):**
+```powershell
+dotnet ef database update --project src/ZenithHarvest.Infrastructure `
+  --connection "Data Source=localhost:1521/freepdb1;User Id=zenith_user;Password=zenith123;"
+```
+
+**DbContext Factory (para migrations):**
+```csharp
+public class ZenithContextFactory : IDesignTimeDbContextFactory<ZenithContext>
+{
+    public ZenithContext CreateDbContext(string[] args)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ZenithContext>();
+        var connectionString = "Data Source=localhost:1521/freepdb1;User Id=zenith_user;Password=zenith123;";
+        
+        optionsBuilder.UseOracle(connectionString);
+        return new ZenithContext(optionsBuilder.Options);
+    }
+}
 ```
 
 ---
@@ -628,4 +707,4 @@ modelBuilder.Entity<Policy>(entity =>
 
 ---
 
-**Última atualização:** Junho 2026
+**Última atualização:** Junho 2026 | **.NET 10.0** | **Oracle 21c Free**
