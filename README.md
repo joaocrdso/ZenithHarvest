@@ -102,8 +102,8 @@ Fornecer uma API REST robusta para cadastro, processamento e análise de sinistr
 ## 🚀 Setup & Instalação
 
 ### Pré-requisitos
-- **.NET SDK 10.0**: [Baixar](https://dotnet.microsoft.com/download)
-- **Visual Studio 2022+** ou **VS Code**
+- **.NET SDK 10.0 (Obrigatório - o SDK 9.0 ou inferior NÃO compila este projeto)**: [Baixar](https://dotnet.microsoft.com/download)
+- **Visual Studio 2022+** ou **VS Code** com a extensão C# Dev Kit
 - **Oracle Database 19c+** ou **Oracle Express Edition**
 - **Git**
 
@@ -132,18 +132,14 @@ Edite `appsettings.json`:
 
 #### Opção B: Oracle Docker (Recomendado para Dev)
 ```bash
-docker run -d \
-  -e ORACLE_PWD=oracle123 \
-  -p 1521:1521 \
-  --name oracle-db \
-  gvenzl/oracle-xe:latest
+docker run -d -e ORACLE_PASSWORD=oracle123 -e APP_USER=zenith_user -e APP_USER_PASSWORD=zenith123 -p 1521:1521 --name oracle-db gvenzl/oracle-xe:latest
 ```
 
-Depois configure em `appsettings.Development.json`:
+Depois configure em `appsettings.Development.json` (use a mesma senha definida em APP_USER_PASSWORD):
 ```json
 {
   "ConnectionStrings": {
-    "Oracle": "User Id=SYSTEM;Password=oracle123;Data Source=127.0.0.1:1521/xe"
+    "Oracle": "User Id=zenith_user;Password=zenith123;Data Source=localhost:1521/XEPDB1;"
   }
 }
 ```
@@ -152,10 +148,14 @@ Depois configure em `appsettings.Development.json`:
 ```bash
 dotnet ef database update --project src/ZenithHarvest.Infrastructure
 ```
+*Nota:* ao configurar o banco pela Opção B (Docker), o comando acima pode falhar com `ORA-01017`, porque o EF não usa Development nos comandos de design-time. Nesse caso, passe a connection string explicitamente:
 
+```bash
+dotnet ef database update --project src/ZenithHarvest.Infrastructure --connection "User Id=zenith_user;Password=zenith123;Data Source=localhost:1521/XEPDB1"
+```
 ### Passo 5: Executar a Aplicação
 ```bash
-dotnet run --project src/ZenithHarvest.Api
+dotnet run --project src/ZenithHarvest.Api --launch-profile https
 ```
 
 **Saída esperada:**
