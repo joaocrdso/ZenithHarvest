@@ -4,12 +4,13 @@ Sistema para gestão de sinistros agrícolas utilizando indicadores de vegetaç�
 
 ## Integrantes:
 
-João dos Santos Cardoso de Jesus - RM560400
-Davi Praxedes Santos Silva - RM560719
-Kauê Vinicius Samartino da Silva - RM559317
-Alexis Ronaldo Quirijota Rondo - RM560384
+João dos Santos Cardoso de Jesus - RM560400<br>
 
-**Status:** ✅ Funcional
+Davi Praxedes Santos Silva - RM560719<br>
+
+Kauê Vinicius Samartino da Silva - RM559317<br>
+
+Alexis Ronaldo Quirijota Rondo - RM560384<br>
 
 ---
 
