@@ -17,7 +17,7 @@ API REST para gestão de sinistros agrícolas utilizando .NET, Oracle Database e
 ## 1. Clonar o projeto
 
 ```bash
-git clone <seu-repositorio>
+git clone https://github.com/joaocrdso/ZenithHarvest.git
 cd zenith-harvest-dotnet
 dotnet restore
 ```
