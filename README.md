@@ -2,6 +2,13 @@
 
 Sistema para gestão de sinistros agrícolas utilizando indicadores de vegetação (NDVI), permitindo que seguradoras realizem análises mais rápidas e precisas sobre perdas causadas por eventos climáticos.
 
+## Integrantes:
+
+João dos Santos Cardoso de Jesus - RM560400
+Davi Praxedes Santos Silva - RM560719
+Kauê Vinicius Samartino da Silva - RM559317
+Alexis Ronaldo Quirijota Rondo - RM560384
+
 **Status:** ✅ Funcional
 
 ---
