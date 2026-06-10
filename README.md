@@ -118,7 +118,7 @@ Users
 Claims
 ```
 
-## 7. Criar dados de teste
+## 8. Criar dados de teste
 
 ### Seguradora
 
@@ -156,7 +156,7 @@ VALUES
 COMMIT;
 ```
 
-## 8. Executar a API
+## 9. Executar a API
 
 ```powershell
 dotnet run --project src/ZenithHarvest.Api --launch-profile https
