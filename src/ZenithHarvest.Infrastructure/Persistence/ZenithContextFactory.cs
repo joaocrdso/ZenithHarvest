@@ -8,8 +8,10 @@ public class ZenithContextFactory : IDesignTimeDbContextFactory<ZenithContext>
     public ZenithContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<ZenithContext>();
-        optionsBuilder.UseOracle("User Id=ZENITH;Password=PLACEHOLDER;Data Source=localhost:1521/XEPDB1;");
-        
+
+        optionsBuilder.UseOracle(
+            "Data Source=localhost:1521/freepdb1;User Id=zenith_user;Password=zenith123;");
+
         return new ZenithContext(optionsBuilder.Options);
     }
 }

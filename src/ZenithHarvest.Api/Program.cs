@@ -19,10 +19,6 @@ builder.Services.AddEndpointsApiExplorer();
 // OPENAPI
 builder.Services.AddOpenApi();
 
-// DBCONTEXT + ORACLE
-builder.Services.AddDbContext<ZenithContext>(opt =>
-    opt.UseOracle(builder.Configuration.GetConnectionString("Oracle")));
-
 // REPOSITORIES (Dependency Injection — DIP)
 builder.Services.AddScoped<IInsurerRepository, InsurerRepository>();
 builder.Services.AddScoped<IPolicyRepository, PolicyRepository>();
@@ -61,6 +57,15 @@ builder.Services.AddHealthChecks()
 
 // LOGGING
 builder.Services.AddLogging();
+
+// DEBUG CONNECTION STRING
+
+builder.Services.AddDbContext<ZenithContext>(opt =>
+    opt.UseOracle(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+var cs = builder.Configuration.GetConnectionString("DefaultConnection");
+
+Console.WriteLine(cs);
 
 var app = builder.Build();
 
