@@ -153,7 +153,7 @@ INSERT INTO "Users"
 ("Id","InsurerId","Email","PasswordHash","Role","Ativo","DataCriacao")
 VALUES
 (1,1,'admin@zenith.com',
-'SHA256('123456')',
+'jZae727K08KaOmKSgOaGzww/XVqGr/PKEgIMkjrcbJI=',
 'Admin',1,SYSTIMESTAMP);
 COMMIT;
 ```

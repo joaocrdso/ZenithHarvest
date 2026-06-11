@@ -20,6 +20,7 @@ public class AuthController : ControllerBase
     /// Autenticar usuário e obter token JWT
     /// </summary>
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
     {
         try

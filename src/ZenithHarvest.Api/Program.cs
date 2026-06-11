@@ -63,11 +63,36 @@ builder.Services.AddLogging();
 builder.Services.AddDbContext<ZenithContext>(opt =>
     opt.UseOracle(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-var cs = builder.Configuration.GetConnectionString("DefaultConnection");
-
-Console.WriteLine(cs);
-
 var app = builder.Build();
+
+// --- SEED ---
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ZenithHarvest.Infrastructure.Persistence.ZenithContext>();
+    db.Database.Migrate();
+
+    if (!db.Insurers.Any())
+    {
+        var insurer = new ZenithHarvest.Domain.Entities.Insurer
+        {
+            CNPJ = "12.345.678/0001-99",
+            Nome = "Zenith Seguros",
+            CodigoSUSEP = "123456"
+        };
+        db.Insurers.Add(insurer);
+        db.SaveChanges();
+
+        db.Users.Add(new ZenithHarvest.Domain.Entities.User
+        {
+            InsurerId = insurer.Id,
+            Email = "admin@zenith.com",
+            PasswordHash = ZenithHarvest.Application.Security.PasswordHasher.Hash("123456"),
+            Role = "Admin",
+            Ativo = true
+        });
+        db.SaveChanges();
+    }
+}
 
 // --- MIDDLEWARE ---
 app.UseMiddleware<ExceptionHandlerMiddleware>();
