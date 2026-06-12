@@ -14,6 +14,14 @@ Alexis Ronaldo Quirijota Rondo - RM560384<br>
 
 ---
 
+## 📹 Vídeos Obrigatórios
+
+Demonstração:https://youtu.be/rERNOWs4jnc
+
+Pitch:
+
+---
+
 ## 🎯 Objetivo
 
 O agronegócio está sujeito a diversos riscos climáticos que podem causar prejuízos significativos aos produtores rurais. O processo tradicional de análise de sinistros costuma ser lento e dependente de vistorias presenciais.
@@ -696,14 +704,6 @@ O sistema utiliza:
 - ✅ Migrations
 - ✅ Testes Automatizados
 - ✅ Tratamento Global de Exceções
-
----
-
-## 📹 Vídeos Obrigatórios
-
-Demonstração:
-
-Pitch:
 
 ---
 
