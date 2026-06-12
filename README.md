@@ -16,7 +16,7 @@ Alexis Ronaldo Quirijota Rondo - RM560384<br>
 
 ## 📹 Vídeos Obrigatórios
 
-Demonstração:https://youtu.be/rERNOWs4jnc
+Demonstração: https://youtu.be/rERNOWs4jnc
 
 Pitch:
 
