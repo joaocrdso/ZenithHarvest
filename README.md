@@ -44,7 +44,7 @@ A **ZenithHarvest** propõe uma solução baseada em tecnologia para auxiliar se
 ### 1. Clonar o projeto
 
 ```bash
-git clone <seu-repositorio>
+git clone https://github.com/joaocrdso/ZenithHarvest.git
 cd zenith-harvest-dotnet
 dotnet restore
 ```
